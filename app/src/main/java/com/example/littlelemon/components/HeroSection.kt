@@ -17,6 +17,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -24,14 +28,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.littlelemon.R
 import com.example.littlelemon.ui.theme.Highlight
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HeroSection() {
+fun HeroSection(searchPhrase: String, onChange: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -75,18 +78,29 @@ fun HeroSection() {
                 contentScale = ContentScale.FillWidth
             )
         }
-        OutlinedTextField(value = "", onValueChange = {}, leadingIcon = {
-            Icon(imageVector = Icons.Outlined.Search, contentDescription = "Search icon")
-        }, modifier = Modifier.fillMaxWidth(), placeholder = {
-            Text(text = "Enter search phrase", style = MaterialTheme.typography.bodyMedium)
-        }, colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Highlight))
+        OutlinedTextField(
+            value = searchPhrase,
+            onValueChange = onChange,
+            leadingIcon = {
+                Icon(imageVector = Icons.Outlined.Search, contentDescription = "Search icon")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = {
+                Text(text = "Enter search phrase", style = MaterialTheme.typography.bodyMedium)
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(containerColor = Highlight),
+            singleLine = true,
+        )
     }
 }
 
 @Composable
 @Preview(showBackground = true)
 fun HeroSectionPreview() {
+    var searchPhrase by remember {
+        mutableStateOf("")
+    }
     LittleLemonTheme {
-        HeroSection()
+        HeroSection(searchPhrase) { searchPhrase = it }
     }
 }

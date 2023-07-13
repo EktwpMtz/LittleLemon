@@ -20,6 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -45,20 +48,37 @@ import com.example.littlelemon.ui.theme.LittleLemonTheme
 fun HomeScreen(navController: NavController) {
     val localContext = LocalContext.current
     val dishRepository by lazy { DishRepository(localContext) }
+    var searchPhrase by remember {
+        mutableStateOf("")
+    }
+    var selectedCategory by remember {
+        mutableStateOf("")
+    }
     Scaffold(topBar = {
         AppHeader(navController = navController)
-    }, containerColor = Color.White) {
+    }, containerColor = Color.White) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(it)
+                .padding(padding)
         ) {
             val dishes by dishRepository.getAllDishes().observeAsState(listOf())
-            HeroSection()
-            CategoriesMenu()
+            var filtered = if (searchPhrase.isNotEmpty()) dishes.filter {
+                it.title.contains(
+                    searchPhrase,
+                    true
+                )
+            } else dishes
+            filtered = if (selectedCategory.isNotEmpty()) filtered.filter {
+                it.category == selectedCategory
+            } else filtered
+            HeroSection(searchPhrase) { searchPhrase = it }
+            CategoriesMenu(selectedCategory) {
+                selectedCategory = if (selectedCategory == it) "" else it
+            }
             Column {
-                dishes.map { DishItem(it = it) }
+                filtered.map { DishItem(it = it) }
             }
         }
     }
